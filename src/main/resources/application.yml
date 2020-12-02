@@ -1,0 +1,65 @@
+# application.yml
+
+spring:
+  application:
+    name: ${APP_NAME:Ledger-server}
+  datasource:
+    url: jdbc:mysql://localhost:3306/ledger?useSSL=false&serverTimezone=UTC&characterEncoding=utf8&allowPublicKeyRetrieval=true
+    username: ${DB_USER:devuser}
+    password: ${DB_PASSWORD:devuserpass}
+    dirver-class-name: com.mysql.jdbc.Driver
+    hikari:
+      auto-commit: false
+      connection-timeout: 3000
+      validation-timeout: 3000
+      max-lifetime: 60000
+      maximum-pool-size: 20
+      minimum-idle: 1
+  jpa:
+    generate-ddl: true    
+    properties:
+      hibernate:
+        ddl-auto: update
+        dialect: org.hibernate.dialect.MySQL55Dialect
+        show_sql: true
+  cache:
+    type: redis
+    redis:
+      time-to-live: "10m"
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:yaozuw}
+    database: 0
+    timeout: 2000
+    max-active: 50
+    max-idle: 50
+    min-idle: 0
+    max-wait: 2000
+
+server:
+  port: ${PORT:8443}
+  ssl:
+    key-store-name: ${KEY_STORE_NAME:localkeystore}
+    key-store: classpath:${server.ssl.key-store-name}
+    key-store-password: ${KEY_STORE_PASSWORD:keystorepass}
+    keyStoreType: PKCS12
+    keyAlias: ${KEY_ALIAS:localcert}
+    key-password: ${KEY_PASSWORD:keystorepass}
+
+#keytool -storepass keystorepass -genkeypair -keyalg RSA -keysize 1024 -validity 365 -alias localcert -storetype PKCS12 -keystore localkeystore -dname "CN=localhost/"
+#keytool -list -v -storetype pkcs12 -keystore localkeystore
+
+pebble:
+  suffix:
+  cache: false
+
+app:
+  cors:
+    mapping: /api/**
+    allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
+    allowedMethods: OPTIONS, PUT, DELETE, GET, POST, PATCH, HEAD
+    allowedHeaders: "*"
+    maxAge: 3600
+    allowCredentials: true
+    
