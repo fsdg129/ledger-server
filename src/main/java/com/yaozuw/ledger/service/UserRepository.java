@@ -15,14 +15,14 @@ public interface UserRepository extends CrudRepository<User, Long> {
 	List<User> findByUsername(String username);
 	
 	@Override
-	@Cacheable("user")
+	@Cacheable(value="user", key="#id")
 	Optional<User> findById(Long id);
 	
 	@Override
-	@CachePut("user")
+	@CachePut(value="user", key="#entity.id", condition="#entity.id != null")
 	<S extends User> S save(S entity);
 	
 	@Override
-	@CacheEvict("user")
+	@CacheEvict(value="user", key="#entity.id")
 	void delete(User entity);
 }

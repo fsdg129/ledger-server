@@ -1,5 +1,6 @@
 package com.yaozuw.ledger.entities;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
@@ -15,7 +16,12 @@ import javax.validation.constraints.Digits;
 
 @Entity
 @Table(name="records")
-public class Record {
+public class Record implements Serializable{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6349735811169575130L;
 
 	//The index of the record stored in the database.
     @Id
@@ -34,12 +40,16 @@ public class Record {
 	@Column(name = "tag", nullable = true, length=20)
 	private String tag;
 	
-	@Column(name = "description", nullable = true, length=50)
+	@Column(name = "description", nullable = true, length=100)
 	private String description;
 	
 	@Column(name = "date", nullable = false)
 	private LocalDate date;
-
+	
+	public Record() {
+		super();
+	}
+	
 	public Record(User user) {
 		super();
 		this.user = user;

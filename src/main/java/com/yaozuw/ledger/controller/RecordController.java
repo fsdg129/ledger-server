@@ -8,6 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -42,7 +43,7 @@ public class RecordController {
 	UserRepository userRepository;
 	
 	@PreAuthorize("hasAuthority('VISITOR') and #userId == #userAdapter.costomerUser.id")
-	@PostMapping("/")
+	@PostMapping("")
 	public ResponseTemplate createRecord(
 			@AuthenticationPrincipal UserAdapter userAdapter,
 			@PathVariable("userId") Long userId,
@@ -62,13 +63,12 @@ public class RecordController {
 	
 	
 	@PreAuthorize("hasAuthority('VISITOR') and #userId == #userAdapter.costomerUser.id")
-	@GetMapping("/")
+	@GetMapping("")
 	public ResponseTemplate getRecords(
 			@AuthenticationPrincipal UserAdapter userAdapter,
 			@PathVariable("userId") Long userId,
-			@PathVariable("recordId") Long recordId,
-			@DateTimeFormat(pattern = "dd-MM-yyyy") @RequestParam("dateStart") LocalDate localDateStart,
-			@DateTimeFormat(pattern = "dd-MM-yyyy") @RequestParam("dateEnd") LocalDate localDateEnd) {
+			@DateTimeFormat(iso = ISO.DATE) @RequestParam("dateStart") LocalDate localDateStart,
+			@DateTimeFormat(iso = ISO.DATE) @RequestParam("dateEnd") LocalDate localDateEnd) {
 		
 		Optional<User> wantedUser = userRepository.findById(userId);
 		if(wantedUser.isEmpty()) {
@@ -86,7 +86,6 @@ public class RecordController {
 	}
 	
 	@PreAuthorize("hasAuthority('VISITOR') and #userId == #userAdapter.costomerUser.id")
-	@PostAuthorize("hasAuthority('VISITOR') and #returnObject.payload.user == #userAdapter.costomerUser")
 	@GetMapping("/{recordId:\\d{1,18}}")
 	public ResponseTemplate getRecord(
 			@AuthenticationPrincipal UserAdapter userAdapter,
@@ -95,6 +94,9 @@ public class RecordController {
 		//Check input
 		 
 		Record record = this.fetchRecordById(recordId);
+		if(record.getUser().getId().equals(userId) == false) {
+			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "the record is not belonged to you");
+		}
 		return new ResponseTemplate("succeeded", "", "", 0, record);
 				
 	}
@@ -132,7 +134,7 @@ public class RecordController {
 		}
 		recordRepository.delete(record);
 		
-		return new ResponseTemplate("succeeded", "", "", 0, new Object());
+		return new ResponseTemplate("succeeded", "", "", 0, "");
 				
 	}
 	

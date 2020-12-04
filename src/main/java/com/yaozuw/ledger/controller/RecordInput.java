@@ -9,12 +9,14 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 
 import com.yaozuw.ledger.entities.User;
 import com.yaozuw.ledger.entities.Record;
 
 public class RecordInput {
 
+	//a two-digit decimal
 	@NotNull
 	@Digits(integer = 10, fraction = 2)
 	private BigDecimal amount;
@@ -23,12 +25,12 @@ public class RecordInput {
 	@Size(max=20)
 	private String tag;
 	
-	@Pattern(regexp="^\\w+$")
-	@Size(max=50)
+	@Pattern(regexp="^[\\s\\w-,.!:;?~+*/]+$")
+	@Size(max=100)
 	private String description;
 	
 	@NotNull
-	@DateTimeFormat(pattern = "dd/MM/yyyy")
+	@DateTimeFormat(iso = ISO.DATE)
 	private LocalDate date;
 	
 	public Record convertedToRecord(User user) {
@@ -48,6 +50,36 @@ public class RecordInput {
 		return record;
 		
 	}
+
+	/**
+	 * @return the amount
+	 */
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	/**
+	 * @return the tag
+	 */
+	public String getTag() {
+		return tag;
+	}
+
+	/**
+	 * @return the description
+	 */
+	public String getDescription() {
+		return description;
+	}
+
+	/**
+	 * @return the date
+	 */
+	public LocalDate getDate() {
+		return date;
+	}
+	
+	
 	
 	
 	

@@ -2,6 +2,8 @@ package com.yaozuw.ledger.entities;
 //The following code is modified from https://github.com/fsdg129/logistics-server-spring-boot,
 //which is a project developed by the author before
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -16,8 +18,13 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 @Entity
 @Table(name="users")
-public class User {
+public class User implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7557549261635794548L;
+
 	//The index of the user stored in the database.
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

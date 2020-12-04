@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,17 +31,20 @@ import com.yaozuw.ledger.service.UserRepository;
 public class UserController {
 
 	@Autowired
-	UserRepository userRepository;
+	private UserRepository userRepository;
+	
+	@Autowired
+	private PasswordEncoder encoder;
 	
 	@PreAuthorize("permitAll()")
-	@PostMapping("/")
+	@PostMapping("")
 	public ResponseTemplate register(
 			@Valid @RequestBody UserInput userInput, 
 			BindingResult result) {
+		this.verifyInput(result);
+		this.checkRepeatedUsername(userInput.getUsername());
 		
-		this.verifyInput(result, userInput.getUsername());
-		
-		User user = userInput.convertedToUser();	
+		User user = userInput.convertedToUser(this.getEncoder());	
 		
 		return this.saveUser(user);
 				
@@ -57,7 +61,7 @@ public class UserController {
 	}	
 	
 	@PreAuthorize("hasAuthority('VISITOR') and #userId == #userAdapter.costomerUser.id")
-	@GetMapping("/{userId:\\d+}")
+	@GetMapping("/{userId:\\d{1,18}}")
 	public ResponseTemplate getUserById(
 			@PathVariable("userId") Long userId, 
 			@AuthenticationPrincipal UserAdapter userAdapter) {
@@ -83,21 +87,24 @@ public class UserController {
 			@PathVariable("userId") Long userId, 
 			@AuthenticationPrincipal UserAdapter userAdapter) {
 		User fetchedUser = this.fetchUserById(userId); 
-		userRepository.delete(fetchedUser);
-		return new ResponseTemplate("succeeded", "", "", 0, new Object());
+		this.getUserRepository().delete(fetchedUser);
+		return new ResponseTemplate("succeeded", "", "", 0, "");
 	}
 	
 	@PreAuthorize("hasAuthority('VISITOR') and #userId == #userAdapter.costomerUser.id")
 	@PutMapping("/{userId:\\d{1,18}}")
-	public ResponseTemplate updateUsername(
+	public ResponseTemplate updateUser(
 			@PathVariable("userId") Long userId, 
 			@AuthenticationPrincipal UserAdapter userAdapter,
 			@Valid @RequestBody UserInput userInput, 
 			BindingResult result) {
 		
-		this.verifyInput(result, userInput.getUsername());
+		this.verifyInput(result);
 		User fetchedUser = this.fetchUserById(userId);	
-		User updatedUser = userInput.updateUser(fetchedUser);	
+		if(! userInput.getUsername().equals(fetchedUser.getUsername()) ) {
+			this.checkRepeatedUsername(userInput.getUsername());
+		}
+		User updatedUser = userInput.updateUser(fetchedUser, this.getEncoder());	
 		
 		return this.saveUser(updatedUser);
 	}
@@ -106,23 +113,28 @@ public class UserController {
 		
 		User savedUser;
 		try {
-			savedUser = userRepository.save(user);
+			savedUser = this.getUserRepository().save(user);
 		} catch(Exception e) {
+			System.out.println(e.getMessage());
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");
 		}	
 		
 		return new ResponseTemplate("succeeded", "", "", 0, savedUser);
 	}
 	
-	private void verifyInput(BindingResult result, String username) {
+	private void verifyInput(BindingResult result) {
 		
 		//Check input
 		if(result.hasErrors()) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The input is not valid");
 		}
-		
+
+		return;
+	}
+	
+	private void checkRepeatedUsername(String username) {
 		//Check whether the username is repeated
-		List<User> duplicatedUserList = userRepository.findByUsername(username);
+		List<User> duplicatedUserList = this.getUserRepository().findByUsername(username);
 		if(duplicatedUserList.isEmpty() == false) {
 			throw new ResponseStatusException(HttpStatus.FORBIDDEN, "The username has been used");
 		}
@@ -132,11 +144,27 @@ public class UserController {
 	
 	private User fetchUserById(Long userId) {
 		
-		Optional<User> wantedUser = userRepository.findById(userId);
+		Optional<User> wantedUser = this.getUserRepository().findById(userId);
 		if(wantedUser.isEmpty()) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "the ID doesn't exist");
 		} 
 		return wantedUser.get();
 	}
+
+	/**
+	 * @return the userRepository
+	 */
+	public UserRepository getUserRepository() {
+		return userRepository;
+	}
+
+	/**
+	 * @return the encoder
+	 */
+	public PasswordEncoder getEncoder() {
+		return encoder;
+	}
+	
+	
 	
 }

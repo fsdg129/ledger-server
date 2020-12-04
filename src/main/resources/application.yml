@@ -27,15 +27,12 @@ spring:
     redis:
       time-to-live: "10m"
   redis:
-    host: ${REDIS_HOST:localhost}
-    port: ${REDIS_PORT:6379}
-    password: ${REDIS_PASSWORD:yaozuw}
+    url: ${REDIS_URL:redis://localhost:6379} 
+    #host: ${REDIS_HOST:localhost}
+    #port: ${REDIS_PORT:6379}
+    #password: ${REDIS_PASSWORD:yaozuw}
     database: 0
     timeout: 2000
-    max-active: 50
-    max-idle: 50
-    min-idle: 0
-    max-wait: 2000
 
 server:
   port: ${PORT:8443}
@@ -50,13 +47,9 @@ server:
 #keytool -storepass keystorepass -genkeypair -keyalg RSA -keysize 1024 -validity 365 -alias localcert -storetype PKCS12 -keystore localkeystore -dname "CN=localhost/"
 #keytool -list -v -storetype pkcs12 -keystore localkeystore
 
-pebble:
-  suffix:
-  cache: false
-
 app:
   cors:
-    mapping: /api/**
+    mapping: /**
     allowedOrigins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000}
     allowedMethods: OPTIONS, PUT, DELETE, GET, POST, PATCH, HEAD
     allowedHeaders: "*"

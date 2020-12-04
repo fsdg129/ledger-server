@@ -7,7 +7,6 @@ import java.util.Optional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.repository.CrudRepository;
 
 import com.yaozuw.ledger.entities.Record;
@@ -17,20 +16,18 @@ public interface RecordRepository extends CrudRepository<Record, Long>{
 	
 	List<Record> findAllByDateBetween(LocalDate dateStart, LocalDate dateEnd);
 	
-	@Cacheable("recordsFromUser#a0.id")
 	List<Record> findAllByUserAndDateBetween(User user, LocalDate dateStart, LocalDate dateEnd);
 	
 	@Override
-	@Cacheable("record")
+	@Cacheable(value="record", key="#id")
 	Optional<Record> findById(Long id);
 	
 	@Override
-	@CachePut("record")
-	@CacheEvict(value="recordsFromUser#a0.user.id", allEntries=true)
+	@CachePut(value="record", key="#entity.id", condition="#entity.id != null")
 	<S extends Record> S save(S entity);
 	
 	@Override
-	@Caching(evict = { @CacheEvict("record"), @CacheEvict(value="recordsFromUser#a0.user.id", allEntries=true) })
+	@CacheEvict(value="record", key="#entity.id")
 	void delete(Record entity);
 
 }
