@@ -87,7 +87,7 @@
 	</dependencies>
 
 	<build>
-		<finalName>logistics-server-spring-boot</finalName>
+		<finalName>ledger-server-spring-boot</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
