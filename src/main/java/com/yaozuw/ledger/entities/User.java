@@ -43,6 +43,9 @@ public class User implements Serializable{
 	@Enumerated(EnumType.STRING)
 	@Column(name = "frequency", nullable = false, length=10)
 	private SummaryFrequency frequency;
+	
+	@Column(name = "email", nullable = false, length=254)
+	private String email;
 		
 	public User() {
 		
@@ -105,6 +108,20 @@ public class User implements Serializable{
 	 */
 	public void setFrequency(SummaryFrequency frequency) {
 		this.frequency = frequency;
+	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+
+	/**
+	 * @param email the email to set
+	 */
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
 	@Override

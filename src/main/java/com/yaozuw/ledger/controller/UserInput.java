@@ -1,6 +1,7 @@
 package com.yaozuw.ledger.controller;
 
 
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
@@ -33,6 +34,11 @@ public class UserInput {
 	@ValueOfEnum(enumClass = SummaryFrequency.class)
 	private String frequency;
 	
+	@NotNull
+	@Email
+	@Size(max=254)
+	private String email;
+	
 	public User convertedToUser(PasswordEncoder encoder) {
 		
 		User user = new User();
@@ -48,6 +54,8 @@ public class UserInput {
 		
 		SummaryFrequency summaryFrequency = SummaryFrequency.valueOf(this.getFrequency());
 		user.setFrequency(summaryFrequency);
+		
+		user.setEmail(this.getEmail());
 		
 		return user;
 		
@@ -73,5 +81,14 @@ public class UserInput {
 	public String getFrequency() {
 		return frequency;
 	}
+
+	/**
+	 * @return the email
+	 */
+	public String getEmail() {
+		return email;
+	}
+	
+	
 
 }

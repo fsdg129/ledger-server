@@ -33,6 +33,11 @@ spring:
     #password: ${REDIS_PASSWORD:yaozuw}
     database: 0
     timeout: 2000
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
 server:
   port: ${PORT:8443}

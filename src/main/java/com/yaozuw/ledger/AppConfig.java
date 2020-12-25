@@ -4,6 +4,8 @@ package com.yaozuw.ledger;
 
 import java.util.List;
 
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -49,6 +51,10 @@ public class AppConfig {
 		return PasswordEncoderFactories.createDelegatingPasswordEncoder();
 	}
 	
+    @Bean
+    MessageConverter createMessageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
 	
 	@Autowired
 	private Environment env;

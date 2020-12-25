@@ -23,6 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.yaozuw.ledger.config.UserAdapter;
 import com.yaozuw.ledger.entities.User;
+import com.yaozuw.ledger.messaging.RegistrationMessage;
+import com.yaozuw.ledger.service.MessagingService;
 import com.yaozuw.ledger.service.UserRepository;
 
 
@@ -36,6 +38,9 @@ public class UserController {
 	@Autowired
 	private PasswordEncoder encoder;
 	
+	@Autowired
+	private MessagingService messagingService;
+	
 	@PreAuthorize("permitAll()")
 	@PostMapping("")
 	public ResponseTemplate register(
@@ -46,7 +51,10 @@ public class UserController {
 		
 		User user = userInput.convertedToUser(this.getEncoder());	
 		
-		return this.saveUser(user);
+		User registedUser = this.saveUser(user);
+		messagingService.sendRegistrationMessage(RegistrationMessage.of(registedUser));
+		
+		return new ResponseTemplate("succeeded", "", "", 0, registedUser);
 				
 	}
 	
@@ -106,10 +114,10 @@ public class UserController {
 		}
 		User updatedUser = userInput.updateUser(fetchedUser, this.getEncoder());	
 		
-		return this.saveUser(updatedUser);
+		return new ResponseTemplate("succeeded", "", "", 0, this.saveUser(updatedUser));
 	}
 	
-	private ResponseTemplate saveUser(User user) {
+	private User saveUser(User user) {
 		
 		User savedUser;
 		try {
@@ -119,7 +127,7 @@ public class UserController {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Internal error");
 		}	
 		
-		return new ResponseTemplate("succeeded", "", "", 0, savedUser);
+		return savedUser;
 	}
 	
 	private void verifyInput(BindingResult result) {
